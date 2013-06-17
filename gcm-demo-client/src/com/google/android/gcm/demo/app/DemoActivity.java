@@ -33,6 +33,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiManager;
+
+import java.lang.Boolean;
+import java.lang.IllegalAccessException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Main UI for the demo app.
@@ -98,21 +105,20 @@ public class DemoActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             /*
              * Typically, an application registers automatically, so options
              * below are disabled. Uncomment them if you want to manually
              * register or unregister the device (you will also need to
              * uncomment the equivalent options on options_menu.xml).
              */
-            /*
+
             case R.id.options_register:
                 GCMRegistrar.register(this, SENDER_ID);
                 return true;
             case R.id.options_unregister:
                 GCMRegistrar.unregister(this);
                 return true;
-             */
             case R.id.options_clear:
                 mDisplay.setText(null);
                 return true;
@@ -143,11 +149,75 @@ public class DemoActivity extends Activity {
 
     private final BroadcastReceiver mHandleMessageReceiver =
             new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
-            mDisplay.append(newMessage + "\n");
+                @Override
+                public void onReceive(Context context, Intent intent) {
+//                    String newMessage = intent.getAction();
+                    String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+
+                    mDisplay.append(newMessage + "\n");
+
+                    try {
+                        if (newMessage.startsWith("open")) {
+                            setAP(true);
+                        } else if (newMessage.startsWith("close")) {
+                            setAP(false);
+                        }
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            };
+
+
+    private void setAP(boolean enabled) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+
+        WifiManager wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+
+        Method method2 = wifi.getClass().getMethod("isWifiApEnabled");
+        Boolean state = (Boolean) method2.invoke(wifi);
+
+        if (state == enabled) {
+            mDisplay.append(enabled + "\n");
+            return;
+        } else {
+
+            WifiConfiguration apConfig = getWifiConfiguration();
+
+            //通过反射调用设置热点
+            Method method = wifi.getClass().getMethod(
+                    "setWifiApEnabled", WifiConfiguration.class, Boolean.TYPE);
+            //返回热点打开状态
+
+            Method set = wifi.getClass().getMethod("setWifiApConfiguration", WifiConfiguration.class);
+            set.invoke(wifi, apConfig);
+
+            if (enabled) {
+                wifi.setWifiEnabled(!enabled);
+                method.invoke(wifi, null, enabled);
+            } else {
+                method.invoke(wifi, null, enabled);
+                wifi.setWifiEnabled(!enabled);
+            }
+            mDisplay.append(enabled + "\n");
         }
-    };
+    }
+
+    private WifiConfiguration getWifiConfiguration() {
+        WifiConfiguration apConfig = new WifiConfiguration();
+        //配置热点的名称
+        apConfig.SSID = "bowen";
+        apConfig.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+        apConfig.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+        apConfig.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+        apConfig.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+        //配置热点的密码
+        apConfig.preSharedKey = "huangbowen";
+        return apConfig;
+    }
 
 }

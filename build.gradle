@@ -10,3 +10,8 @@ allprojects {
         options.compilerArgs << "-Xlint:-options"
     }
 }
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.2'
+}

@@ -58,7 +58,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         Log.i(TAG, "Received message. Extras: " + intent.getExtras());
         String message = getString(R.string.gcm_message);
         if (intent.getExtras().containsKey("message")) {
-            message = intent.getExtras().getString("message");   
+            message = intent.getExtras().getString("message");
         }
         displayMessage(context, message);
         // notifies user

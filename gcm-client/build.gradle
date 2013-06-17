@@ -14,7 +14,7 @@ apply plugin: 'android-library'
 sourceCompatibility = '1.6'
 
 android {
-    target = 'android-16'
+    target = 'android-17'
 
     sourceSets {
         main {

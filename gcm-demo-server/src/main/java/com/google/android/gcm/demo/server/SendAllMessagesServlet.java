@@ -15,23 +15,18 @@
  */
 package com.google.android.gcm.demo.server;
 
-import com.google.android.gcm.server.Constants;
-import com.google.android.gcm.server.Message;
-import com.google.android.gcm.server.MulticastResult;
-import com.google.android.gcm.server.Result;
-import com.google.android.gcm.server.Sender;
+import com.google.android.gcm.server.*;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet that adds a new message to all registered devices.
@@ -78,9 +73,15 @@ public class SendAllMessagesServlet extends BaseServlet {
       if (devices.size() == 1) {
         // send a single message using plain post
         String registrationId = devices.get(0);
-        Message message = new Message.Builder().build();
+          Message message = new Message.Builder()
+                  .collapseKey("1")
+                  .timeToLive(3)
+                  .delayWhileIdle(true)
+                  .addData("message", "message is created at builder")
+                  .build();
         Result result = sender.send(message, registrationId, 5);
-        status = "Sent message to one device: " + result;
+        status = "regId:" + registrationId + "                     ";
+        status += "Sent message to one device: " + result;
       } else {
         // send a multicast message using JSON
         // must split in chunks of 1000 devices (GCM limit)

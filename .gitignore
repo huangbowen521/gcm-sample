@@ -1,2 +1,8 @@
 .gradle/
 local.properties
+.idea/
+gcm-sample.iml
+gcm-client/gcm-client.iml
+gcm-demo-client/gcm-demo-client.iml
+gcm-demo-server/gcm-demo-server.iml
+gcm-server/gcm-server.iml

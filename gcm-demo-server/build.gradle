@@ -13,3 +13,7 @@ dependencies {
     providedCompile 'org.mockito:mockito-all:1.9.5'
     providedCompile 'junit:junit:4.11'
 }
+
+jettyRun {
+    httpPort = 9000
+}
