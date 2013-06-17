@@ -1,9 +1,0 @@
-*.pyc
-*~
-.*.swp
-._*
-*.egg-info/
-/build
-/dist
-/lib
-/venv
